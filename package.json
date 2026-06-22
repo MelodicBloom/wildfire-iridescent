@@ -1,0 +1,22 @@
+{
+  "name": "wildfire-iridescent",
+  "private": true,
+  "version": "6.0.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev":        "npm run dev --workspace=apps/playground",
+    "dev:web":    "npm run dev --workspace=apps/web",
+    "build":      "npm run build --workspace=apps/playground",
+    "build:web":  "npm run build --workspace=apps/web",
+    "tokens":     "npm run build --workspace=packages/theme-iridescent",
+    "storybook":  "storybook dev -p 6006",
+    "build-sb":   "storybook build"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y":         "^8.2.0",
+    "@storybook/addon-essentials":   "^8.2.0",
+    "@storybook/addon-interactions": "^8.2.0",
+    "@storybook/react-vite":         "^8.2.0",
+    "storybook":                     "^8.2.0"
+  }
+}

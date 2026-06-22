@@ -1,1 +1,24 @@
-{"name":"@wm/theme-iridescent","version":"1.0.0","private":false,"type":"module","scripts":{"build":"style-dictionary build --config style-dictionary.config.mjs"},"devDependencies":{"style-dictionary":"^4.3.0"}}
+{
+  "name": "@wm/theme-iridescent",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "build":          "node style-dictionary.config.mjs",
+    "prepare":        "npm run build",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "style-dictionary": "^4.3.0"
+  },
+  "files": [
+    "dist/",
+    "tokens/",
+    "sd-formats/"
+  ],
+  "exports": {
+    "./dist/*.css":  "./dist/*.css",
+    "./dist/*.mjs":  "./dist/*.mjs",
+    "./dist/*.json": "./dist/*.json"
+  }
+}

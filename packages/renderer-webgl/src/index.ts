@@ -1,7 +1,11 @@
-export { AbaloneCanvas } from './AbaloneCanvas';
-export { PrismEyeCursor } from './PrismEyeCursor';
-export { TiltedChromaCard } from './TiltedChromaCard';
-export { SharedChromaProvider, useSharedChroma } from './SharedChromaContext';
-export { useMotionUniform } from './hooks/useMotionUniform';
-export { useScrollChroma } from './hooks/useScrollChroma';
-export { usePointerUniforms } from './hooks/usePointerUniforms';
+export { AbaloneCanvas }       from './components/AbaloneCanvas'
+export { PrismEyeCursor }      from './components/PrismEyeCursor'
+export { TiltedChromaCard }    from './components/TiltedChromaCard'
+export { SharedChromaProvider, useSharedChroma } from './components/SharedChromaContext'
+export { useWebGLReadyGate }   from './testing/useWebGLReadyGate'
+export { useGPUTier }          from './hooks/useGPUTier'
+export { useMotionUniform }    from './hooks/useMotionUniform'
+export { usePointerUniforms }  from './hooks/usePointerUniforms'
+export { useScrollChroma }     from './hooks/useScrollChroma'
+export type { AbaloneCanvasProps }    from './components/AbaloneCanvas'
+export type { TiltedChromaCardProps } from './components/TiltedChromaCard'

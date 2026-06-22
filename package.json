@@ -4,19 +4,23 @@
   "version": "6.0.0",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev":        "npm run dev --workspace=apps/playground",
-    "dev:web":    "npm run dev --workspace=apps/web",
-    "build":      "npm run build --workspace=apps/playground",
-    "build:web":  "npm run build --workspace=apps/web",
-    "tokens":     "npm run build --workspace=packages/theme-iridescent",
-    "storybook":  "storybook dev -p 6006",
-    "build-sb":   "storybook build"
+    "dev":         "npm run dev --workspace=apps/playground",
+    "dev:web":     "npm run dev --workspace=apps/web",
+    "build":       "npm run tokens && npm run build --workspace=apps/playground",
+    "build:web":   "npm run tokens && npm run build --workspace=apps/web",
+    "tokens":      "npm run build --workspace=packages/theme-iridescent",
+    "storybook":   "storybook dev -p 6006",
+    "build-sb":    "npm run tokens && storybook build",
+    "test:visual": "playwright test e2e/",
+    "test:vrt-ci": "npm run build-sb && npx serve storybook-static -p 6006 & npm run test:visual"
   },
   "devDependencies": {
     "@storybook/addon-a11y":         "^8.2.0",
     "@storybook/addon-essentials":   "^8.2.0",
     "@storybook/addon-interactions": "^8.2.0",
     "@storybook/react-vite":         "^8.2.0",
-    "storybook":                     "^8.2.0"
+    "storybook":                     "^8.2.0",
+    "playwright":                    "^1.45.0",
+    "serve":                         "^14.2.0"
   }
 }

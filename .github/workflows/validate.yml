@@ -1,0 +1,118 @@
+name: Validation Matrix
+
+on:
+  workflow_dispatch:          # manual trigger from Actions tab
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────
+  # Step 1 — Token build
+  # Validates Style Dictionary v4 config, emits dist/ artifacts.
+  # ─────────────────────────────────────────────────────────────────────
+  tokens:
+    name: "1 · Token build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run tokens
+      - name: Verify dist artifacts
+        run: |
+          test -f packages/theme-iridescent/dist/iridescent.css     && echo "✓ iridescent.css"
+          test -f packages/theme-iridescent/dist/tailwind.tokens.mjs && echo "✓ tailwind.tokens.mjs"
+          test -f packages/theme-iridescent/dist/figma.tokens.json   && echo "✓ figma.tokens.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: theme-dist
+          path: packages/theme-iridescent/dist/
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Step 2 — TypeScript build (renderer-webgl)
+  # Confirms entry point re-exports and hook types compile cleanly.
+  # ─────────────────────────────────────────────────────────────────────
+  typecheck:
+    name: "2 · TypeScript"
+    runs-on: ubuntu-latest
+    needs: tokens
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: theme-dist
+          path: packages/theme-iridescent/dist/
+      - run: npm run build --workspace=packages/renderer-webgl
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Step 3 — Storybook static build
+  # Confirms all stories compile and token CSS is importable.
+  # ─────────────────────────────────────────────────────────────────────
+  storybook-build:
+    name: "3 · Storybook build"
+    runs-on: ubuntu-latest
+    needs: tokens
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: theme-dist
+          path: packages/theme-iridescent/dist/
+      - run: npm run build-sb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storybook-static
+          path: storybook-static/
+          retention-days: 3
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Step 4 — Playwright VRT
+  # Serves the built Storybook, waits for port 6006, then runs all specs.
+  # Uses SwiftShader (software WebGL) for deterministic GPU-free rendering.
+  # ─────────────────────────────────────────────────────────────────────
+  playwright-vrt:
+    name: "4 · Playwright VRT"
+    runs-on: ubuntu-latest
+    needs: storybook-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: theme-dist
+          path: packages/theme-iridescent/dist/
+      - uses: actions/download-artifact@v4
+        with:
+          name: storybook-static
+          path: storybook-static/
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Run visual tests
+        run: npm run test:visual
+        env:
+          CI: true
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

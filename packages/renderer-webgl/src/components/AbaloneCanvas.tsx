@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { AbaloneShader } from '../shaders/AbaloneShader'
 import { useWebGLReadyGate } from '../hooks/useWebGLReadyGate'
 
-interface AbaloneCanvasProps {
+export interface AbaloneCanvasProps {
   className?: string
   style?: React.CSSProperties
 }

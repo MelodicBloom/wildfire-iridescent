@@ -14,11 +14,11 @@ const vertexShader = /* glsl */`
 const fragmentShader = /* glsl */`
   precision mediump float;
   uniform float uTime;
-  uniform vec2  uPointer;
+  uniform vec2  uMouse;
   varying vec2  vUv;
 
   vec3 prismChroma(vec2 uv, vec2 ptr, float t) {
-    float d = length(uv - ptr);
+    float d = length(uv - (ptr * 0.5 + 0.5));
     float ring = smoothstep(0.35, 0.0, d) * smoothstep(0.0, 0.35, d);
     float r = ring * (0.5 + 0.5 * sin(t + uv.x * 8.0));
     float g = ring * (0.5 + 0.5 * sin(t + uv.y * 8.0 + 2.094));
@@ -27,19 +27,22 @@ const fragmentShader = /* glsl */`
   }
 
   void main() {
-    vec3 col = prismChroma(vUv, uPointer * 0.5 + 0.5, uTime);
+    vec3 col = prismChroma(vUv, uMouse, uTime);
     gl_FragColor = vec4(col, max(col.r, max(col.g, col.b)));
   }
 `
 
 export function PrismMesh() {
-  const matRef = useRef<THREE.ShaderMaterial>(null)
-  const uniforms = usePointerUniforms()
+  const mouseRef    = useRef<{ value: [number, number] }>(null)
+  const velocityRef = useRef<{ value: number }>(null)
+  const matRef      = useRef<THREE.ShaderMaterial>(null)
+
+  usePointerUniforms({ uMouse: mouseRef, uMouseVelocity: velocityRef })
 
   useFrame(({ clock }) => {
     if (!matRef.current) return
-    matRef.current.uniforms.uTime.value = clock.getElapsedTime()
-    matRef.current.uniforms.uPointer.value = uniforms.uPointer.value
+    matRef.current.uniforms.uTime.value  = clock.getElapsedTime()
+    matRef.current.uniforms.uMouse.value = mouseRef.current?.value ?? [0, 0]
   })
 
   return (
@@ -51,8 +54,8 @@ export function PrismMesh() {
         fragmentShader={fragmentShader}
         transparent
         uniforms={{
-          uTime:    { value: 0 },
-          uPointer: { value: new THREE.Vector2(0, 0) },
+          uTime:  { value: 0 },
+          uMouse: { value: new THREE.Vector2(0, 0) },
         }}
       />
     </mesh>

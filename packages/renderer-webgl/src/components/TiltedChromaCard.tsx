@@ -4,7 +4,7 @@ import { useWebGLReadyGate } from '../hooks/useWebGLReadyGate'
 import { useAberrationAngle } from '../hooks/useAberrationAngle'
 import { ChromaMesh } from '../meshes/ChromaMesh'
 
-interface TiltedChromaCardProps {
+export interface TiltedChromaCardProps {
   children?: React.ReactNode
   className?: string
   style?: React.CSSProperties

@@ -2,7 +2,7 @@
  * useGPUTier — singleton probe, one context per page, released immediately.
  */
 import { useState, useEffect } from 'react'
-import type { GPUTier, BehaviorProfile } from '@wm/governance'
+import type { GpuTier, BehaviorProfile } from '@wm/governance'
 
 let probePromise: Promise<BehaviorProfile> | null = null
 
@@ -29,12 +29,11 @@ function runProbe(): Promise<BehaviorProfile> {
     const precisionFmt = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT)
     const supportsHighP = !!precisionFmt && precisionFmt.precision > 0
 
-    // Release probe context immediately — never counts against browser limits
     const ext = gl.getExtension('WEBGL_lose_context')
     if (ext) ext.loseContext()
 
     const isWebGL2 = 'drawBuffers' in gl
-    const tier: GPUTier = isWebGL2 && supportsHighP ? 'HIGH' : supportsHighP ? 'MEDIUM' : 'LOW'
+    const tier: GpuTier = isWebGL2 && supportsHighP ? 'HIGH' : supportsHighP ? 'MEDIUM' : 'LOW'
     const orders = tier === 'HIGH' ? 4 : tier === 'MEDIUM' ? 2 : 1
 
     if ('getBattery' in navigator) {

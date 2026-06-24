@@ -1,7 +1,7 @@
 /**
  * Style Dictionary v4 config
- * Uses `new StyleDictionary(config)` + `buildAllPlatforms()` — v4 API.
- * CSS platform sets prefix:'iridescent' → --iridescent-* variables.
+ * Platforms: css, esm, figma
+ * Prefix: 'iridescent' → --iridescent-* CSS variables
  */
 import StyleDictionary from 'style-dictionary'
 import { fileURLToPath } from 'url'
@@ -17,33 +17,39 @@ StyleDictionary.registerFormat({
 
 const sd = new StyleDictionary({
   source: [path.join(__dirname, 'tokens/**/*.json')],
-  log: { verbosity: 'verbose' },
+  log: { verbosity: 'default' },
   platforms: {
     css: {
       transformGroup: 'css',
       prefix: 'iridescent',
       buildPath: 'dist/',
-      files: [{
-        destination: 'iridescent.css',
-        format: 'css/variables',
-        options: { outputReferences: true },
-      }],
+      files: [
+        {
+          destination: 'iridescent.css',
+          format: 'css/variables',
+          options: { outputReferences: false },
+        },
+      ],
     },
     esm: {
       transformGroup: 'js',
       buildPath: 'dist/',
-      files: [{
-        destination: 'tailwind.tokens.mjs',
-        format: 'javascript/esm',
-      }],
+      files: [
+        {
+          destination: 'tailwind.tokens.mjs',
+          format: 'javascript/esm',
+        },
+      ],
     },
     figma: {
       transformGroup: 'js',
       buildPath: 'dist/',
-      files: [{
-        destination: 'figma.tokens.json',
-        format: 'json/figma-variables',
-      }],
+      files: [
+        {
+          destination: 'figma.tokens.json',
+          format: 'json/figma-variables',
+        },
+      ],
     },
   },
 })

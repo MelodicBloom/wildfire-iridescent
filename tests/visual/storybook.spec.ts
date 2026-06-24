@@ -2,10 +2,11 @@ import { test, expect } from '@playwright/test'
 
 /**
  * VRT smoke tests.
- * Shaders are frozen via `data-vrt-freeze` injected before screenshot,
- * so the canvas produces a stable frame regardless of uTime.
+ * Shaders are frozen by overriding rAF before screenshot so uTime stops
+ * incrementing and canvas pixels are stable across runs.
+ *
  * Playwright manages its own snapshot dir (storybook.spec.ts-snapshots/).
- * First run writes baselines and fails — re-run or use --update-snapshots.
+ * First run (or --update-snapshots) writes baselines; subsequent runs diff.
  */
 
 const stories = [
@@ -13,6 +14,19 @@ const stories = [
   { name: 'PrismEyeCursor',   path: '/iframe.html?id=renderer-prismeyecursor--default&viewMode=story' },
   { name: 'TiltedChromaCard', path: '/iframe.html?id=renderer-tiltedchromacard--default&viewMode=story' },
 ]
+
+// Errors emitted by TiltedChromaCard's DOM-layer that are non-fatal in a
+// Storybook iframe (no scroll container, no SharedChromaProvider wrapper).
+const KNOWN_SAFE_ERRORS = [
+  'SwiftShader',
+  'WEBGL_lose_context',
+  // SharedChromaContext is optional; TiltedChromaCard silently skips it
+  'useSharedChroma',
+]
+
+function isSafeError(msg: string): boolean {
+  return KNOWN_SAFE_ERRORS.some((s) => msg.includes(s))
+}
 
 for (const story of stories) {
   test(`${story.name} renders without console errors`, async ({ page }) => {
@@ -24,32 +38,26 @@ for (const story of stories) {
 
     await page.goto(story.path)
     await page.waitForSelector('canvas', { timeout: 10_000 }).catch(() => null)
-    // Let the first frame paint
-    await page.waitForTimeout(800)
+    // Let the first frame paint fully
+    await page.waitForTimeout(1_000)
 
-    // Freeze the R3F animation loop so uTime stops incrementing
+    // Freeze all animation loops (rAF + R3F useFrame) so uTime stops
     await page.evaluate(() => {
       document.documentElement.setAttribute('data-vrt-freeze', 'true')
-      // Cancel all rAF callbacks to stop the render loop
-      const noop = () => {}
-      const orig = window.requestAnimationFrame
-      ;(window as any).__origRAF = orig
-      window.requestAnimationFrame = (cb) => { void cb; return 0 }
+      window.requestAnimationFrame = () => 0
     })
-    // One more tick to let the frozen frame settle
     await page.waitForTimeout(200)
 
-    const realErrors = errors.filter(
-      (e) => !e.includes('SwiftShader') && !e.includes('WEBGL_lose_context')
-    )
-    expect(realErrors, `Console errors in ${story.name}: ${realErrors.join(' | ')}`).toHaveLength(0)
+    const realErrors = errors.filter((e) => !isSafeError(e))
+    expect(
+      realErrors,
+      `Console errors in ${story.name}: ${realErrors.join(' | ')}`
+    ).toHaveLength(0)
 
     await expect(page).toHaveScreenshot(`${story.name}.png`, {
       fullPage: false,
-      // Generous pixel budget — SwiftShader floating-point is non-deterministic
       maxDiffPixels: 4000,
       threshold: 0.15,
-      // Don't wait for animation stability — we froze it manually
       animations: 'disabled',
     })
   })

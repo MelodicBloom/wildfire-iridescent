@@ -1,12 +1,11 @@
 import { test, expect } from '@playwright/test'
-import * as fs from 'fs'
-import * as path from 'path'
 
 /**
- * Smoke + VRT tests.
- * - Always: verify each story loads with no console errors.
- * - If baselines exist: also do screenshot diff.
- * - If no baselines: write them and pass (first-run bootstrap).
+ * VRT smoke tests.
+ * Shaders are frozen via `data-vrt-freeze` injected before screenshot,
+ * so the canvas produces a stable frame regardless of uTime.
+ * Playwright manages its own snapshot dir (storybook.spec.ts-snapshots/).
+ * First run writes baselines and fails — re-run or use --update-snapshots.
  */
 
 const stories = [
@@ -14,9 +13,6 @@ const stories = [
   { name: 'PrismEyeCursor',   path: '/iframe.html?id=renderer-prismeyecursor--default&viewMode=story' },
   { name: 'TiltedChromaCard', path: '/iframe.html?id=renderer-tiltedchromacard--default&viewMode=story' },
 ]
-
-const snapshotDir = path.join(__dirname, '__snapshots__')
-const baselinesExist = fs.existsSync(snapshotDir) && fs.readdirSync(snapshotDir).length > 0
 
 for (const story of stories) {
   test(`${story.name} renders without console errors`, async ({ page }) => {
@@ -28,21 +24,33 @@ for (const story of stories) {
 
     await page.goto(story.path)
     await page.waitForSelector('canvas', { timeout: 10_000 }).catch(() => null)
-    await page.waitForTimeout(1_500)
+    // Let the first frame paint
+    await page.waitForTimeout(800)
+
+    // Freeze the R3F animation loop so uTime stops incrementing
+    await page.evaluate(() => {
+      document.documentElement.setAttribute('data-vrt-freeze', 'true')
+      // Cancel all rAF callbacks to stop the render loop
+      const noop = () => {}
+      const orig = window.requestAnimationFrame
+      ;(window as any).__origRAF = orig
+      window.requestAnimationFrame = (cb) => { void cb; return 0 }
+    })
+    // One more tick to let the frozen frame settle
+    await page.waitForTimeout(200)
 
     const realErrors = errors.filter(
       (e) => !e.includes('SwiftShader') && !e.includes('WEBGL_lose_context')
     )
     expect(realErrors, `Console errors in ${story.name}: ${realErrors.join(' | ')}`).toHaveLength(0)
 
-    if (baselinesExist) {
-      await expect(page).toHaveScreenshot(`${story.name}.png`, { fullPage: false })
-    } else {
-      // No baselines yet — capture and skip diff
-      // Run `npx playwright test --update-snapshots` locally then commit __snapshots__/
-      if (!fs.existsSync(snapshotDir)) fs.mkdirSync(snapshotDir, { recursive: true })
-      await page.screenshot({ path: path.join(snapshotDir, `${story.name}.png`) })
-      console.log(`[vrt] Baseline written for ${story.name}`)
-    }
+    await expect(page).toHaveScreenshot(`${story.name}.png`, {
+      fullPage: false,
+      // Generous pixel budget — SwiftShader floating-point is non-deterministic
+      maxDiffPixels: 4000,
+      threshold: 0.15,
+      // Don't wait for animation stability — we froze it manually
+      animations: 'disabled',
+    })
   })
 }

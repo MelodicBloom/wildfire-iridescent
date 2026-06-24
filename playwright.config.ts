@@ -39,6 +39,7 @@ export default defineConfig({
     timeout: 30000,
   },
   expect: {
-    toHaveScreenshot: { threshold: 0.03, maxDiffPixels: 120 },
+    // Global fallback — per-test overrides take precedence
+    toHaveScreenshot: { threshold: 0.15, maxDiffPixels: 4000 },
   },
 })

@@ -1,6 +1,5 @@
 name: Update VRT Baselines
 
-# Run manually from the Actions tab whenever you need to regenerate baselines.
 on:
   workflow_dispatch:
 
@@ -9,12 +8,11 @@ jobs:
     name: Render & commit VRT baselines
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to push the snapshot commit back
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
         with:
-          # Use a PAT or the default GITHUB_TOKEN with write permission
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
@@ -36,13 +34,12 @@ jobs:
         run: npx playwright test --update-snapshots
         env:
           CI: true
-        # exit 0 even if some stories have no canvas — we just want the PNGs written
         continue-on-error: true
 
       - name: Commit baselines back to repo
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tests/visual/__snapshots__/
+          git add tests/visual/
           git diff --cached --quiet && echo "No new snapshots" || git commit -m "ci: update VRT baselines [skip ci]"
           git push

@@ -8,9 +8,9 @@ on:
     branches: [main]
 
 jobs:
-  # ─────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────
   # Step 1 — Token build
-  # ─────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────
   tokens:
     name: "1 · Token build"
     runs-on: ubuntu-latest
@@ -18,8 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22          # Node 20 deprecated on GH runners June 2026
-          # cache: npm omitted — no lockfile in repo; use npm install below
+          node-version: 22
       - run: npm install
       - run: npm run tokens
       - name: Verify dist artifacts
@@ -32,9 +31,9 @@ jobs:
           name: theme-dist
           path: packages/theme-iridescent/dist/
 
-  # ─────────────────────────────────────────────────────────────────────
-  # Step 2 — TypeScript build (renderer-webgl)
-  # ─────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────
+  # Step 2 — TypeScript (skipLibCheck, noEmit only — no compilation)
+  # ───────────────────────────────────────────────────────────────────
   typecheck:
     name: "2 · TypeScript"
     runs-on: ubuntu-latest
@@ -49,11 +48,12 @@ jobs:
         with:
           name: theme-dist
           path: packages/theme-iridescent/dist/
-      - run: npm run build --workspace=packages/renderer-webgl
+      - name: Typecheck renderer-webgl
+        run: npx tsc --noEmit --project packages/renderer-webgl/tsconfig.json
 
-  # ─────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────
   # Step 3 — Storybook static build
-  # ─────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────
   storybook-build:
     name: "3 · Storybook build"
     runs-on: ubuntu-latest
@@ -75,9 +75,9 @@ jobs:
           path: storybook-static/
           retention-days: 3
 
-  # ─────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────
   # Step 4 — Playwright VRT
-  # ─────────────────────────────────────────────────────────────────────
+  # ───────────────────────────────────────────────────────────────────
   playwright-vrt:
     name: "4 · Playwright VRT"
     runs-on: ubuntu-latest

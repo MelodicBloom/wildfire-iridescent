@@ -1,7 +1,7 @@
 name: Validation Matrix
 
 on:
-  workflow_dispatch:          # manual trigger from Actions tab
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -10,7 +10,6 @@ on:
 jobs:
   # ─────────────────────────────────────────────────────────────────────
   # Step 1 — Token build
-  # Validates Style Dictionary v4 config, emits dist/ artifacts.
   # ─────────────────────────────────────────────────────────────────────
   tokens:
     name: "1 · Token build"
@@ -19,9 +18,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
+          node-version: 22          # Node 20 deprecated on GH runners June 2026
+          # cache: npm omitted — no lockfile in repo; use npm install below
+      - run: npm install
       - run: npm run tokens
       - name: Verify dist artifacts
         run: |
@@ -35,7 +34,6 @@ jobs:
 
   # ─────────────────────────────────────────────────────────────────────
   # Step 2 — TypeScript build (renderer-webgl)
-  # Confirms entry point re-exports and hook types compile cleanly.
   # ─────────────────────────────────────────────────────────────────────
   typecheck:
     name: "2 · TypeScript"
@@ -45,9 +43,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
+          node-version: 22
+      - run: npm install
       - uses: actions/download-artifact@v4
         with:
           name: theme-dist
@@ -56,7 +53,6 @@ jobs:
 
   # ─────────────────────────────────────────────────────────────────────
   # Step 3 — Storybook static build
-  # Confirms all stories compile and token CSS is importable.
   # ─────────────────────────────────────────────────────────────────────
   storybook-build:
     name: "3 · Storybook build"
@@ -66,9 +62,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
+          node-version: 22
+      - run: npm install
       - uses: actions/download-artifact@v4
         with:
           name: theme-dist
@@ -82,8 +77,6 @@ jobs:
 
   # ─────────────────────────────────────────────────────────────────────
   # Step 4 — Playwright VRT
-  # Serves the built Storybook, waits for port 6006, then runs all specs.
-  # Uses SwiftShader (software WebGL) for deterministic GPU-free rendering.
   # ─────────────────────────────────────────────────────────────────────
   playwright-vrt:
     name: "4 · Playwright VRT"
@@ -93,9 +86,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
+          node-version: 22
+      - run: npm install
       - uses: actions/download-artifact@v4
         with:
           name: theme-dist

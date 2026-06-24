@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { AbaloneCanvas } from '../components/AbaloneCanvas'
+import { AbaloneCanvas } from '../AbaloneCanvas'
 
 const meta: Meta<typeof AbaloneCanvas> = {
   title: 'Renderer/AbaloneCanvas',
   component: AbaloneCanvas,
   parameters: {
-    chromatic: {
-      delay: 300,
-      pauseAnimationAtEnd: true,
-    },
+    chromatic: { delay: 300, pauseAnimationAtEnd: true },
     layout: 'fullscreen',
   },
 }

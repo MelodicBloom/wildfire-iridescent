@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { PrismEyeCursor } from '../components/PrismEyeCursor'
+import { PrismEyeCursor } from '../PrismEyeCursor'
 
 const meta: Meta<typeof PrismEyeCursor> = {
   title: 'Renderer/PrismEyeCursor',

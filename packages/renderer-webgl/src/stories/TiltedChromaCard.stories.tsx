@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { TiltedChromaCard } from '../components/TiltedChromaCard'
+import { TiltedChromaCard } from '../TiltedChromaCard'
 
 const meta: Meta<typeof TiltedChromaCard> = {
   title: 'Renderer/TiltedChromaCard',

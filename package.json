@@ -12,7 +12,7 @@
     "storybook":   "npm run tokens && storybook dev -p 6006",
     "build-sb":    "npm run tokens && storybook build",
     "test:visual": "playwright test",
-    "test:vrt-ci": "npm run build-sb && npx wait-on http://localhost:6006 && npm run test:visual"
+    "test:vrt-ci": "npm run build-sb && npm run test:visual"
   },
   "devDependencies": {
     "@storybook/addon-a11y":         "^8.2.0",

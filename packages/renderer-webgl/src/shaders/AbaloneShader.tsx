@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { usePointerUniforms } from '../hooks/usePointerUniforms'
+import { useTokenUniforms } from '../hooks/useTokenUniforms'
 
 const vertexShader = /* glsl */`
   varying vec2 vUv;
@@ -14,12 +15,13 @@ const vertexShader = /* glsl */`
 const fragmentShader = /* glsl */`
   precision mediump float;
   uniform float uTime;
+  uniform float uAnimationSpeed;
   uniform vec2  uMouse;
   varying vec2  vUv;
 
   vec3 thinFilm(vec2 uv, float t, vec2 ptr) {
     float d = length(uv - (ptr * 0.5 + 0.5));
-    float phase = t * 0.5 + d * 9.0;
+    float phase = t * 0.5 * uAnimationSpeed + d * 9.0;
     float r  = 0.5 + 0.5 * sin(phase);
     float g  = 0.5 + 0.5 * sin(phase + 2.094);
     float b  = 0.5 + 0.5 * sin(phase + 4.189);
@@ -36,15 +38,16 @@ const fragmentShader = /* glsl */`
 `
 
 export function AbaloneShader() {
-  const mouseRef    = useRef<{ value: [number, number] }>(null)
+  const mouseRef = useRef<{ value: [number, number] }>(null)
   const velocityRef = useRef<{ value: number }>(null)
-  const matRef      = useRef<THREE.ShaderMaterial>(null)
+  const matRef = useRef<THREE.ShaderMaterial>(null)
 
   usePointerUniforms({ uMouse: mouseRef, uMouseVelocity: velocityRef })
+  useTokenUniforms(matRef)
 
   useFrame(({ clock }) => {
     if (!matRef.current) return
-    matRef.current.uniforms.uTime.value  = clock.getElapsedTime()
+    matRef.current.uniforms.uTime.value = clock.getElapsedTime()
     matRef.current.uniforms.uMouse.value = mouseRef.current?.value ?? [0, 0]
   })
 
@@ -56,7 +59,8 @@ export function AbaloneShader() {
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
         uniforms={{
-          uTime:  { value: 0 },
+          uTime: { value: 0 },
+          uAnimationSpeed: { value: 1 },
           uMouse: { value: new THREE.Vector2(0, 0) },
         }}
       />

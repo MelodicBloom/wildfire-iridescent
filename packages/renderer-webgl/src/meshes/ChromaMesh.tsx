@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useTokenUniforms } from '../hooks/useTokenUniforms'
 
 const vertexShader = /* glsl */`
   varying vec2 vUv;
@@ -13,11 +14,12 @@ const vertexShader = /* glsl */`
 const fragmentShader = /* glsl */`
   precision mediump float;
   uniform float uTime;
+  uniform float uAnimationSpeed;
   uniform float uAberrationAngle;
   varying vec2  vUv;
 
   void main() {
-    float t = uTime * 0.4 + uAberrationAngle;
+    float t = uTime * 0.4 * uAnimationSpeed + uAberrationAngle;
     float r = 0.5 + 0.5 * sin(t + vUv.x * 5.0);
     float g = 0.5 + 0.5 * sin(t + vUv.y * 5.0 + 2.094);
     float b = 0.5 + 0.5 * sin(t + (vUv.x + vUv.y) * 4.0 + 4.189);
@@ -32,6 +34,7 @@ interface ChromaMeshProps {
 
 export function ChromaMesh({ aberrationAngle }: ChromaMeshProps) {
   const matRef = useRef<THREE.ShaderMaterial>(null)
+  useTokenUniforms(matRef)
 
   useFrame(({ clock }) => {
     if (!matRef.current) return
@@ -48,8 +51,9 @@ export function ChromaMesh({ aberrationAngle }: ChromaMeshProps) {
         fragmentShader={fragmentShader}
         transparent
         uniforms={{
-          uTime:             { value: 0 },
-          uAberrationAngle:  { value: 0 },
+          uTime: { value: 0 },
+          uAnimationSpeed: { value: 1 },
+          uAberrationAngle: { value: 0 },
         }}
       />
     </mesh>

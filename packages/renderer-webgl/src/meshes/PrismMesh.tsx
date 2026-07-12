@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { usePointerUniforms } from '../hooks/usePointerUniforms'
+import { useTokenUniforms } from '../hooks/useTokenUniforms'
 
 const vertexShader = /* glsl */`
   varying vec2 vUv;
@@ -14,6 +15,7 @@ const vertexShader = /* glsl */`
 const fragmentShader = /* glsl */`
   precision mediump float;
   uniform float uTime;
+  uniform float uAnimationSpeed;
   uniform vec2  uMouse;
   varying vec2  vUv;
 
@@ -27,21 +29,22 @@ const fragmentShader = /* glsl */`
   }
 
   void main() {
-    vec3 col = prismChroma(vUv, uMouse, uTime);
+    vec3 col = prismChroma(vUv, uMouse, uTime * uAnimationSpeed);
     gl_FragColor = vec4(col, max(col.r, max(col.g, col.b)));
   }
 `
 
 export function PrismMesh() {
-  const mouseRef    = useRef<{ value: [number, number] }>(null)
+  const mouseRef = useRef<{ value: [number, number] }>(null)
   const velocityRef = useRef<{ value: number }>(null)
-  const matRef      = useRef<THREE.ShaderMaterial>(null)
+  const matRef = useRef<THREE.ShaderMaterial>(null)
 
   usePointerUniforms({ uMouse: mouseRef, uMouseVelocity: velocityRef })
+  useTokenUniforms(matRef)
 
   useFrame(({ clock }) => {
     if (!matRef.current) return
-    matRef.current.uniforms.uTime.value  = clock.getElapsedTime()
+    matRef.current.uniforms.uTime.value = clock.getElapsedTime()
     matRef.current.uniforms.uMouse.value = mouseRef.current?.value ?? [0, 0]
   })
 
@@ -54,7 +57,8 @@ export function PrismMesh() {
         fragmentShader={fragmentShader}
         transparent
         uniforms={{
-          uTime:  { value: 0 },
+          uTime: { value: 0 },
+          uAnimationSpeed: { value: 1 },
           uMouse: { value: new THREE.Vector2(0, 0) },
         }}
       />

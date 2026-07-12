@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { MutableRefObject } from 'react'
+import type { MutableRefObject, RefObject } from 'react'
 import type * as THREE from 'three'
 
 /**
@@ -20,7 +20,7 @@ const NUMERIC_TOKEN_MAP: Record<string, string> = {
   uFilmThicknessMax: '--iridescent-material-film-thickness-max',
 }
 
-type MaterialRef = MutableRefObject<THREE.ShaderMaterial | null>
+type MaterialRef = RefObject<THREE.ShaderMaterial>
 type MaterialListRef = MutableRefObject<THREE.ShaderMaterial[]>
 
 function resolveMaterials(ref: MaterialRef | MaterialListRef): THREE.ShaderMaterial[] {

@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test'
 
+/**
+ * Normalizes bare decimals like `.92` to `0.92` so Chrome's exact CSS custom
+ * property serialization can be compared against authored token values.
+ */
+const normCss = (value: string) => value.replace(/^\.(\d+)/, '0.$1')
+
 const stories = [
   {
     name: 'DefaultTokens',
@@ -28,7 +34,7 @@ for (const { name, id, cssVars } of stories) {
         (tokenName) => getComputedStyle(document.documentElement).getPropertyValue(tokenName).trim(),
         varName,
       )
-      expect(actual).toBe(expected)
+      expect(normCss(actual)).toBe(normCss(expected))
     }
 
     await expect(page).toHaveScreenshot(`${name}.png`, {

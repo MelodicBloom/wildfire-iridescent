@@ -2,27 +2,33 @@
   "name": "wildfire-iridescent",
   "private": true,
   "version": "9.0.0",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev":         "npm run tokens && npm run dev --workspace=apps/playground",
-    "dev:web":     "npm run tokens && npm run dev --workspace=apps/web",
-    "build":       "npm run tokens && npm run build --workspace=apps/playground",
-    "build:web":   "npm run tokens && npm run build --workspace=apps/web",
-    "tokens":      "npm run build --workspace=packages/theme-iridescent",
-    "storybook":   "npm run tokens && storybook dev -p 6006",
-    "build-sb":    "npm run tokens && storybook build",
+    "dev": "npm run tokens && npm run dev --workspace=apps/playground",
+    "dev:web": "npm run tokens && npm run dev --workspace=apps/web",
+    "build": "npm run tokens && npm run build --workspace=apps/playground",
+    "build:web": "npm run tokens && npm run build --workspace=apps/web",
+    "tokens": "npm run build --workspace=packages/theme-iridescent",
+    "storybook": "npm run tokens && storybook dev -p 6006",
+    "build-sb": "npm run tokens && storybook build",
     "test:visual": "playwright test",
     "test:vrt-ci": "npm run build-sb && npm run test:visual"
   },
   "devDependencies": {
-    "@storybook/addon-a11y":         "^8.2.0",
-    "@storybook/addon-essentials":   "^8.2.0",
+    "@storybook/addon-a11y": "^8.2.0",
+    "@storybook/addon-essentials": "^8.2.0",
     "@storybook/addon-interactions": "^8.2.0",
-    "@storybook/react-vite":         "^8.2.0",
-    "storybook":                     "^8.2.0",
-    "@playwright/test":              "^1.54.0",
-    "http-server":                   "^14.1.1",
-    "wait-on":                       "^8.0.1",
-    "chromatic":                     "^13.0.0"
+    "@storybook/react-vite": "^8.2.0",
+    "storybook": "^8.2.0",
+    "@playwright/test": "^1.54.0",
+    "http-server": "^14.1.1",
+    "wait-on": "^8.0.1",
+    "chromatic": "^13.0.0"
+  },
+  "overrides": {
+    "@types/three": "0.175.0"
   }
 }

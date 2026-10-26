@@ -56,7 +56,7 @@ export default function Home() {
         maxWidth: 900,
       }}>
         {['Abalone Pearl', 'Prism Light', 'Chroma Shift'].map((label) => (
-          <TiltedChromaCard key={label} width={360} height={280}>
+          <TiltedChromaCard key={label} style={{ width: 360, height: 280 }}>
             <div style={{
               position: 'absolute', inset: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',

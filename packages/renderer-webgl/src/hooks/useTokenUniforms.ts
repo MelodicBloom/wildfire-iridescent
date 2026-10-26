@@ -20,7 +20,7 @@ const NUMERIC_TOKEN_MAP: Record<string, string> = {
   uFilmThicknessMax: '--iridescent-material-film-thickness-max',
 }
 
-type MaterialRef = RefObject<THREE.ShaderMaterial>
+type MaterialRef = RefObject<THREE.ShaderMaterial | null>
 type MaterialListRef = MutableRefObject<THREE.ShaderMaterial[]>
 
 function resolveMaterials(ref: MaterialRef | MaterialListRef): THREE.ShaderMaterial[] {
